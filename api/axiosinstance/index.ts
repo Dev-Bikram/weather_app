@@ -1,5 +1,5 @@
 import axios from "axios";
-import { baseUrl_Weather } from "../endpoints";
+import { baseUrl_Weather , baseUrl_History} from "../endpoints";
 
 
 
@@ -8,9 +8,18 @@ import { baseUrl_Weather } from "../endpoints";
 
 export const axiosInstance = axios.create({
     baseURL: baseUrl_Weather,
+   
     
   });
 
+  export const axiosInstances = axios.create({
+    baseURL: baseUrl_History ,
+   
+    
+  });
+
+
+  
   // const config = {
   //   headers: {
   //     "Access-Control-Allow-Origin": "*",

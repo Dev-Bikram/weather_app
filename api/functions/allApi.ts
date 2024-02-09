@@ -1,6 +1,6 @@
 import axios from "axios";
 import { endpoints } from "../endpoints";
-import { axiosInstance } from "../axiosinstance";
+import { axiosInstance, axiosInstances } from "../axiosinstance";
 
 
 export interface IweatherPayload{
@@ -10,8 +10,22 @@ export interface IweatherPayload{
 
 }
 
+export interface IweatherHistoryPayload{
+  lat:number
+  lon:number
+  start: number
+  end: number
+  
+
+}
+
 export const fetchWeatherDetails = async (obj:IweatherPayload) => {
-    const res = await axiosInstance.get<any>(endpoints.auth.weather(obj));
+    const res = await axiosInstance.get<any>(endpoints.weatherReport.weather(obj));
+    return res;
+  };
+
+  export const fetchWeatherHistoryDetails = async (obj:IweatherHistoryPayload) => {
+    const res = await axiosInstances.get<any>(endpoints.weatherReport.weatherHistory(obj));
     return res;
   };
   

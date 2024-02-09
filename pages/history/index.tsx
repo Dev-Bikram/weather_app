@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/api/axiosinstance';
-import {fetchWeatherDetails } from '@/api/functions/allApi';
+import {fetchWeatherHistoryDetails } from '@/api/functions/allApi';
 import Wrapper from '@/layout/Wrapper'
 import { FormControl, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
 import React, { useState } from 'react'
@@ -14,19 +14,18 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { IconButton } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
-
-
+import BarChart from './chart';
 
 
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-type IweatherPayload  = {
+type IweatherHistoryPayload = {
   lat: number
   lon: number
+  start: number
+  end: number
 }
 
 
@@ -45,7 +44,7 @@ const darkTheme = createTheme({
 
 
 const Index = () => {
-  const [place, setPlace] = useState<IweatherPayload | null>(null)
+  const [history, setHistory] = useState<IweatherHistoryPayload | null>(null)
   // const [search, setSearch] = useState<boolean>(false);
   const [theme, setTheme] = useState(darkTheme);
   
@@ -54,32 +53,27 @@ const Index = () => {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<IweatherPayload>()
+  } = useForm<IweatherHistoryPayload>()
 
   
 
-  const { data: weather, isLoading } = useQuery({
-    queryKey: ['weather', place],
-    queryFn: () => !!place ? fetchWeatherDetails(place) : fetchWeatherDetails({
+  const { data: report, isLoading } = useQuery({
+    queryKey: ['report', history],
+    queryFn: () => !!history ? fetchWeatherHistoryDetails(history) : fetchWeatherHistoryDetails({
       lat: 0,
-      lon: 0
+      lon: 0,
+      start: 0,
+      end: 0
     }),
-    enabled: !!place 
+    enabled: !!history
   });
-const onSubmit: SubmitHandler<IweatherPayload> = (data) => {
-    setPlace(data);
+const onSubmit: SubmitHandler<IweatherHistoryPayload> = (data) => {
+    setHistory(data);
     }
-    console.log(weather)
-
-    
+    console.log(report)
 
   if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex' }}>
-      <CircularProgress />
-    </Box>
-    
-    )
+    return <p>Loading...</p>;
   }
 
   const toggleTheme = () => {
@@ -90,17 +84,24 @@ const onSubmit: SubmitHandler<IweatherPayload> = (data) => {
 
   return (
     <>
-    
     <ThemeProvider theme={theme}>
       <Wrapper>
         <div>
-          <h1 style={{ textAlign: "center" }}>Weather Info</h1>
+          <h1 style={{ textAlign: "center" }}>Weather History Report</h1>
           <br/>
-          <h3 style={{ textAlign: "center" }}>Please Enter Your City Longitude & Latitude Here</h3>
+          <h3 style={{ textAlign: "center" }}>Please Enter The Following Details Here</h3>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
           <Button onClick={toggleTheme} variant="contained" color="primary">
             Light Mood/Dark Mood
+          </Button>
+        </div>
+        <br/>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          <Button  variant="contained" color="primary">
+          <Link href="/" >
+              Back
+          </Link>
           </Button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '56vh' }}>
@@ -130,6 +131,20 @@ const onSubmit: SubmitHandler<IweatherPayload> = (data) => {
                 placeholder='Longitude'
                 {...register("lon", { required: true })}
               />
+              <TextField
+                hiddenLabel
+                id="filled-hidden-label-small"
+                variant="filled"
+                placeholder='Start-Time'
+                {...register("start", { required: true })}
+              />
+              <TextField
+                hiddenLabel
+                id="filled-hidden-label-normal"
+                variant="filled"
+                placeholder='End-Time'
+                {...register("end", { required: true })}
+              />
               <Button variant="contained" type='submit' disableElevation>
                 Search
               </Button>
@@ -152,19 +167,17 @@ const onSubmit: SubmitHandler<IweatherPayload> = (data) => {
            <TableCell>Sunrise</TableCell>
            <TableCell>Sunset</TableCell>
            <TableCell>Temperature</TableCell>
-           <TableCell>Wind-Speed</TableCell>
            
        </TableRow>
        
        <TableRow>
-                <TableCell>{weather?.data.name}</TableCell>
+                {/* <TableCell>{weather?.data.name}</TableCell>
                 <TableCell>{weather?.data.cod}</TableCell>
                 <TableCell>{weather?.data.sys.country}</TableCell>
-                <TableCell>{weather?.data.main.humidity}%</TableCell>
-                <TableCell>{dayjs.unix(weather?.data.sys.sunrise).utc().format('ddd MMM D YYYY HH:mm:ss ')}</TableCell>
-                <TableCell>{dayjs.unix(weather?.data.sys.sunset).utc().format('ddd MMM D YYYY HH:mm:ss ')}</TableCell>
-                <TableCell>{weather?.data.main.temp} K</TableCell>
-                <TableCell>{weather?.data.wind.speed} mt/sec</TableCell>
+                <TableCell>{weather?.data.main.humidity}</TableCell>
+                <TableCell>{dayjs.unix(weather?.data.sys.sunrise).utc().format('ddd MMM D YYYY HH:mm:ss [GMT]ZZ')}</TableCell>
+                <TableCell>{dayjs.unix(weather?.data.sys.sunset).utc().format('ddd MMM D YYYY HH:mm:ss [GMT]ZZ')}</TableCell>
+                <TableCell>{weather?.data.main.temp}K</TableCell> */}
               </TableRow>
         
 
@@ -173,21 +186,13 @@ const onSubmit: SubmitHandler<IweatherPayload> = (data) => {
        </TableBody>
        </Table>
        </TableContainer>
-
-        </div>
-           
-        
-
-        <div  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-        
-        <iframe src="https://www.google.com/maps/d/embed?mid=1VFzjeArnHwIghbeiCRbBMQTOquk&hl=en&ehbc=2E312F" width="1500" height="480"></iframe>
-
+       <h1 style={{ textAlign: "center" }}>Time-Temperature Graphical Chart</h1>
+       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+           <BarChart/>
+           </div>
         </div>
       </Wrapper>
       </ThemeProvider>
-      
-
-     
     </>
   )
 }
