@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/api/axiosinstance';
 import {fetchWeatherHistoryDetails } from '@/api/functions/allApi';
 import Wrapper from '@/layout/Wrapper'
-import { FormControl, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
+import { CssBaseline, FormControl, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
 import React, { useState } from 'react'
 import { useQuery } from 'react-query';
 import Stack from '@mui/material/Stack';
@@ -92,6 +92,7 @@ const onSubmit: SubmitHandler<IweatherHistoryPayload> = (data) => {
           <h3 style={{ textAlign: "center" }}>Please Enter The Following Details Here</h3>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          <CssBaseline/>
           <Button onClick={toggleTheme} variant="contained" color="primary">
             Light Mood/Dark Mood
           </Button>
